@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Remark Editor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@neos21/neos-normalize@2.0.1/neos-normalize.min.css">
+    <style>
+
+html,
+body {
+  overflow-y: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.editor-container {
+  --controller-height: 3rem;
+  display: grid;
+  grid-template-areas: "controller controller" "input output";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: var(--controller-height) 1fr;
+  height: 100%;
+}
+.editor-controller {
+  grid-area: controller;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1rem;
+  line-height: var(--controller-height);
+}
+.editor-title {
+  margin-left: 1rem;
+}
+.editor-title a {
+  color: inherit;
+  font-weight: bold;
+  text-decoration: none;
+}
+.editor-title a:hover {
+  text-decoration: underline;
+}
+.editor-parse-button-wrapper {
+  text-align: center;
+}
+.editor-parse-button,
+.editor-help-button {
+  vertical-align: baseline;
+}
+.editor-help-button-wrapper {
+  margin-righT: 1rem;
+  text-align: right;
+}
+.editor-input {
+  grid-area: input;
+}
+.editor-input-markdown {
+  overflow-y: scroll;
+  width: 100%;
+  height: calc(100vh - var(--controller-height));
+  outline: 0;
+  border-radius: 0;
+  padding: var(--nn-space-tiny) 1rem;
+  line-height: 1.6;
+  resize: none;
+}
+.editor-output {
+  grid-area: output;
+  margin-left: -1px;
+}
+.editor-output-html {
+  overflow-y: scroll;
+  width: 100%;
+  height: calc(100vh - var(--controller-height));
+  border: 1px solid var(--nn-colour-grey-default);
+  padding: var(--nn-space-tiny) 1rem;
+  line-height: 1.6;
+}
+.editor-output-html > :first-child {
+  margin-top: 0;
+}
+::placeholder,
+.editor-memo {
+  color: var(--nn-colour-grey-default);
+  font-family: var(--nn-font-family-monospace);
+}
+
+:not(pre) > code[class*="language-"], pre[class*="language-"] { border: 0; background: #272822; }
+code[class*="language-"], pre[class*="language-"], .token.punctuation, .language-css .token.string, .style .token.string, .token.entity, .token.operator, .token.url, .token.variable { color: #f8f8f2; }
+.token.cdata, .token.comment, .token.doctype, .token.prolog { color: #778090; }
+.token.constant, .token.deleted, .token.keyword, .token.property, .token.symbol, .token.tag { color: #f92672; }
+.token.boolean, .token.number { color: #ae81ff; }
+.token.attr-name, .token.builtin, .token.char, .token.inserted, .token.selector, .token.string { color: #a6e22e; }
+.token.atrule, .token.attr-value, .token.function { color: #e6db74; }
+.token.important, .token.regex { color: #fd971f; }
+.token.bold, .token.important, .token.italic { font-weight: bold; }
+
+.header-link {
+  --header-link-width: 1rem;
+  position: relative;
+  left: calc(var(--header-link-width) * -1);
+  display: inline-block;
+  margin-right: calc(var(--header-link-width) * -1);
+  width: var(--header-link-width);
+  color: #ddd;
+  font-size: .87rem;
+  font-weight: normal;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+}
+:hover > .header-link {
+  color: #999;
+}
+.header-link:hover {
+  color: #666;
+}
+.header-link-mark::before {
+  content: "$";
+  padding: .6rem 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: var(--nn-space-default);
+}
+img {
+  max-width: 100%;
+}
+li > p:first-child {
+  margin: 0;
+}
+
+    </style>
+  </head>
+  <body>
+
+<div class="editor-container">
+  <div class="editor-controller">
+    <div class="editor-title"><a href="https://neos21.net/">Remark Editor</a></div>
+    <div class="editor-parse-button-wrapper"><button type="button" class="editor-parse-button" accesskey="f" tabindex="2">Parse</button></div>
+    <div class="editor-help-button-wrapper"><button type="button" class="editor-help-button" tabindex="-1">?</button></div>
+  </div>
+  <div class="editor-input">
+    <textarea class="editor-input-markdown" placeholder="(Please Input Markdown)" accesskey="d" tabindex="1"></textarea>
+  </div>
+  <div class="editor-output">
+    <div class="editor-output-html">
+      <span class="editor-memo">(Preview Area)</span>
+    </div>
+  </div>
+</div>
+
+    <script>
+
+(() => {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.editor-parse-button').addEventListener('click', () => {
+      const inputMarkdown = document.querySelector('.editor-input-markdown').value;
+      if(!inputMarkdown.trim()) return console.log('No Inputs');
+      fetch('./api/parse', { method: 'POST', body: inputMarkdown })
+        .then(response => response.text())
+        .then(text => {
+          console.log('Parse : ', text);
+          document.querySelector('.editor-output-html').innerHTML = text || '<span class="editor-memo">(Preview Area)</span>';
+        })
+        .catch(error => console.error('Parse : Error', error));
+    });
+    
+    document.querySelector('.editor-help-button').addEventListener('click', () => {
+      alert('Access Key :\n\nParse Button : [f]\nEditor Textarea : [d]');
+    });
+  });
+})();
+
+    </script>
+  </body>
+</html>
